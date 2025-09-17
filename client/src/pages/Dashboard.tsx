@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavigationHeader } from "@/components/NavigationHeader";
 import { StatsCard } from "@/components/StatsCard";
 import { GoalCard } from "@/components/GoalCard";
@@ -7,62 +7,194 @@ import { MotivationalMessage } from "@/components/MotivationalMessage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Target, TrendingUp, Flame, Calendar, Search, Filter } from "lucide-react";
 import type { Goal, InsertGoal, User } from "@shared/schema";
 
-// TODO: Remove mock data when implementing real backend
-const mockGoals: Goal[] = [
-  {
-    id: '1',
-    userId: 'user1',
-    title: 'Daily Exercise',
-    description: 'Complete 30 minutes of physical activity',
-    category: 'fitness',
-    frequency: 'daily',
-    target: 1,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '2',
-    userId: 'user1',
-    title: 'Read for 20 minutes',
-    description: 'Read books, articles, or educational content',
-    category: 'learning',
-    frequency: 'daily',
-    target: 1,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '3',
-    userId: 'user1',
-    title: 'Meditate',
-    description: 'Practice mindfulness meditation',
-    category: 'health',
-    frequency: 'daily',
-    target: 1,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
+interface GoalWithProgress extends Goal {
+  streak: number;
+  progress: number;
+  completionCount: number;
+}
+
+interface UserStats {
+  totalGoals: number;
+  activeGoals: number;
+  totalCompletions: number;
+  completionsThisMonth: number;
+}
 
 export default function Dashboard() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth() as { 
+    user: User | undefined; 
+    isLoading: boolean;
+  };
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  
-  // TODO: Replace with real data from backend
-  const [goals, setGoals] = useState<Goal[]>(mockGoals);
-  
-  if (isLoading) {
+
+  // Fetch user goals
+  const { data: goals = [], isLoading: goalsLoading } = useQuery<Goal[]>({
+    queryKey: ['/api/goals'],
+    enabled: !!user,
+  });
+
+  // Fetch user stats
+  const { data: stats } = useQuery<UserStats>({
+    queryKey: ['/api/stats'],
+    enabled: !!user,
+  });
+
+  // Fetch progress and streak data for each goal
+  const { data: goalProgress = new Map() } = useQuery({
+    queryKey: ['/api/goals/progress'],
+    enabled: goals.length > 0,
+    queryFn: async () => {
+      const progressMap = new Map();
+      await Promise.all(
+        goals.map(async (goal) => {
+          try {
+            const [progressRes, streakRes] = await Promise.all([
+              fetch(`/api/goals/${goal.id}/progress`).then(res => res.json()),
+              fetch(`/api/goals/${goal.id}/streak`).then(res => res.json())
+            ]);
+            progressMap.set(goal.id, {
+              ...progressRes,
+              ...streakRes
+            });
+          } catch (error) {
+            console.error(`Error fetching data for goal ${goal.id}:`, error);
+            progressMap.set(goal.id, {
+              progress: 0,
+              completionCount: 0,
+              currentStreak: 0,
+              longestStreak: 0
+            });
+          }
+        })
+      );
+      return progressMap;
+    }
+  });
+
+  // Add goal mutation
+  const addGoalMutation = useMutation({
+    mutationFn: async (goalData: InsertGoal) => {
+      return await apiRequest('/api/goals', 'POST', goalData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
+      toast({
+        title: "Goal Created",
+        description: "Your new goal has been added successfully!",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create goal",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Complete goal mutation
+  const completeGoalMutation = useMutation({
+    mutationFn: async (goalId: string) => {
+      return await apiRequest(`/api/goals/${goalId}/complete`, 'POST', { completedDate: new Date().toISOString().split('T')[0] });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/goals/progress'] });
+      toast({
+        title: "Goal Completed!",
+        description: "Great job! Keep up the momentum!",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to complete goal",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete goal mutation
+  const deleteGoalMutation = useMutation({
+    mutationFn: async (goalId: string) => {
+      return await apiRequest(`/api/goals/${goalId}`, 'DELETE');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
+      toast({
+        title: "Goal Deleted",
+        description: "Goal has been removed successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete goal",
+        variant: "destructive",
+      });
+    },
+  });
+
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-background" data-testid="dashboard-loading">
         <NavigationHeader />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center space-y-2">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+              <p className="text-muted-foreground">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated, show login prompt
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background" data-testid="dashboard-unauthenticated">
+        <NavigationHeader user={null} />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center">
+                <Target className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">Welcome to HabitFlow</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  Please sign in to start tracking your habits and building lasting progress.
+                </p>
+              </div>
+              <Button onClick={() => window.location.href = '/api/login'} data-testid="button-login-prompt">
+                Sign In to Continue
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (goalsLoading) {
+    return (
+      <div className="min-h-screen bg-background" data-testid="dashboard-loading-goals">
+        <NavigationHeader user={user} onLogout={handleLogout} />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="text-center space-y-2">
@@ -82,38 +214,38 @@ export default function Dashboard() {
     return matchesSearch && matchesCategory && goal.isActive;
   });
 
+  const handleLogout = () => {
+    window.location.href = '/api/logout';
+  };
+
   const handleAddGoal = (goalData: InsertGoal) => {
-    // TODO: Replace with actual API call
-    const newGoal: Goal = {
-      id: Math.random().toString(36).substr(2, 9),
-      userId: user?.id || 'user1',
-      ...goalData,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    setGoals(prev => [...prev, newGoal]);
-    console.log('Add goal:', goalData);
+    addGoalMutation.mutate(goalData);
   };
 
   const handleCompleteGoal = (goalId: string) => {
-    // TODO: Replace with actual API call
-    console.log('Complete goal:', goalId);
+    completeGoalMutation.mutate(goalId);
   };
 
   const handleEditGoal = (goal: Goal) => {
     // TODO: Implement edit functionality
-    console.log('Edit goal:', goal);
+    toast({
+      title: "Coming Soon",
+      description: "Goal editing feature will be available soon!",
+    });
   };
 
   const handleDeleteGoal = (goalId: string) => {
-    // TODO: Replace with actual API call
-    setGoals(prev => prev.filter(g => g.id !== goalId));
-    console.log('Delete goal:', goalId);
+    deleteGoalMutation.mutate(goalId);
   };
 
-  const handleLogout = () => {
-    window.location.href = '/api/logout';
-  };
+  // Calculate current streak for motivational message
+  const currentStreaks = Array.from(goalProgress.values())
+    .map((progress: any) => progress.currentStreak || 0);
+  const maxStreak = Math.max(0, ...currentStreaks);
+  
+  // Calculate today's completions for motivational message
+  const todayCompletions = Array.from(goalProgress.values())
+    .filter((progress: any) => progress.progress === 100).length;
 
   return (
     <div className="min-h-screen bg-background" data-testid="dashboard-page">
@@ -132,8 +264,8 @@ export default function Dashboard() {
 
         {/* Motivational Message */}
         <MotivationalMessage 
-          streak={7} // TODO: Replace with real streak data
-          completionsToday={2} // TODO: Replace with real completion data
+          streak={maxStreak}
+          completionsToday={todayCompletions}
           userName={user?.firstName || 'Champion'}
         />
 
@@ -141,29 +273,27 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatsCard 
             title="Active Goals"
-            value={goals.filter(g => g.isActive).length}
+            value={stats?.activeGoals || goals.filter(g => g.isActive).length}
             description="Currently tracking"
             icon={Target}
           />
           <StatsCard 
-            title="Completion Rate"
-            value="85%" // TODO: Replace with real data
-            description="This month"
+            title="Total Goals"
+            value={stats?.totalGoals || goals.length}
+            description="All time"
             icon={TrendingUp}
-            trend={{ value: 12, isPositive: true }}
           />
           <StatsCard 
-            title="Current Streak"
-            value={7} // TODO: Replace with real data
+            title="Best Streak"
+            value={maxStreak}
             description="days in a row"
             icon={Flame}
           />
           <StatsCard 
-            title="Total Completions"
-            value={156} // TODO: Replace with real data
+            title="Completions"
+            value={stats?.totalCompletions || 0}
             description="All time"
             icon={Calendar}
-            trend={{ value: 8, isPositive: true }}
           />
         </div>
 
@@ -171,7 +301,9 @@ export default function Dashboard() {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <h2 className="text-2xl font-bold" data-testid="goals-section-title">Your Goals</h2>
-            <AddGoalDialog onAdd={handleAddGoal} />
+            <AddGoalDialog 
+              onAdd={handleAddGoal}
+            />
           </div>
 
           {/* Filters */}
@@ -206,18 +338,26 @@ export default function Dashboard() {
           {/* Goals Grid */}
           {filteredGoals.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="goals-grid">
-              {filteredGoals.map((goal) => (
-                <GoalCard 
-                  key={goal.id}
-                  goal={goal}
-                  streak={Math.floor(Math.random() * 15) + 1} // TODO: Replace with real streak data
-                  progress={Math.floor(Math.random() * 100)} // TODO: Replace with real progress data
-                  completionCount={Math.floor(Math.random() * goal.target)} // TODO: Replace with real completion data
-                  onComplete={handleCompleteGoal}
-                  onEdit={handleEditGoal}
-                  onDelete={handleDeleteGoal}
-                />
-              ))}
+              {filteredGoals.map((goal) => {
+                const progressData = goalProgress.get(goal.id) || {
+                  progress: 0,
+                  completionCount: 0,
+                  currentStreak: 0,
+                };
+                
+                return (
+                  <GoalCard 
+                    key={goal.id}
+                    goal={goal}
+                    streak={progressData.currentStreak}
+                    progress={progressData.progress}
+                    completionCount={progressData.completionCount}
+                    onComplete={handleCompleteGoal}
+                    onEdit={handleEditGoal}
+                    onDelete={handleDeleteGoal}
+                  />
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-16 space-y-4" data-testid="no-goals-message">
