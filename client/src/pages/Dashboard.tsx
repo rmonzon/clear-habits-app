@@ -152,6 +152,29 @@ export default function Dashboard() {
     },
   });
 
+  // Edit goal mutation
+  const editGoalMutation = useMutation({
+    mutationFn: async ({ goalId, goalData }: { goalId: string; goalData: Partial<InsertGoal> }) => {
+      return await apiRequest('PUT', `/api/goals/${goalId}`, goalData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/goals/progress'] });
+      toast({
+        title: "Goal Updated",
+        description: "Your goal has been updated successfully!",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update goal",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Delete goal mutation
   const deleteGoalMutation = useMutation({
     mutationFn: async (goalId: string) => {
@@ -191,12 +214,8 @@ export default function Dashboard() {
     logProgressMutation.mutate({ goalId, value });
   };
 
-  const handleEditGoal = (goal: Goal) => {
-    // TODO: Implement edit functionality
-    toast({
-      title: "Coming Soon",
-      description: "Goal editing feature will be available soon!",
-    });
+  const handleEditGoal = (goalId: string, goalData: Partial<InsertGoal>) => {
+    editGoalMutation.mutate({ goalId, goalData });
   };
 
   const handleDeleteGoal = (goalId: string) => {
