@@ -92,6 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { goalId } = req.params;
       const completedDate = req.body.completedDate || new Date().toISOString().split('T')[0];
+      const value = req.body.value; // Optional: actual value for progress tracking
       
       // Verify goal belongs to user
       const goal = await storage.getGoal(goalId, userId);
@@ -99,7 +100,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Goal not found" });
       }
       
-      const completion = await storage.completeGoal(goalId, userId, completedDate);
+      const completion = await storage.completeGoal(goalId, userId, completedDate, value);
       res.status(201).json(completion);
     } catch (error) {
       console.error("Error completing goal:", error);
@@ -234,40 +235,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Goal not found" });
       }
       
-      // Calculate progress for current period
-      const now = new Date();
-      let startDate: Date;
+      const completions = await storage.getGoalCompletions(goalId);
+      const completionCount = completions.length;
       
-      switch (goal.frequency) {
-        case 'daily':
-          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          break;
-        case 'weekly':
-          const dayOfWeek = now.getDay();
-          startDate = new Date(now.getTime() - dayOfWeek * 24 * 60 * 60 * 1000);
-          startDate.setHours(0, 0, 0, 0);
-          break;
-        case 'monthly':
-          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-          break;
-        case 'yearly':
-          startDate = new Date(now.getFullYear(), 0, 1);
-          break;
-        default:
-          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      let progress = 0;
+      let currentValue = goal.startingValue;
+      
+      // For value-based goals (with unit, startingValue, and targetValue)
+      if (goal.unit && goal.startingValue !== null && goal.targetValue !== null) {
+        // Find the most recent completion with a value
+        const valueCompletions = completions.filter(c => c.value !== null);
+        
+        if (valueCompletions.length > 0) {
+          // Get the most recent value
+          const latestCompletion = valueCompletions.sort((a, b) => 
+            new Date(b.completedAt || 0).getTime() - new Date(a.completedAt || 0).getTime()
+          )[0];
+          
+          currentValue = latestCompletion.value!;
+          
+          // Calculate progress based on whether it's reverse (weight loss) or forward (weight gain)
+          const isReverse = goal.startingValue > goal.targetValue;
+          
+          if (isReverse) {
+            // Weight loss: progress = (starting - current) / (starting - target)
+            const totalChange = goal.startingValue - goal.targetValue;
+            const currentChange = goal.startingValue - currentValue;
+            progress = Math.max(0, Math.min(100, (currentChange / totalChange) * 100));
+          } else {
+            // Weight gain: progress = (current - starting) / (target - starting)
+            const totalChange = goal.targetValue - goal.startingValue;
+            const currentChange = currentValue - goal.startingValue;
+            progress = Math.max(0, Math.min(100, (currentChange / totalChange) * 100));
+          }
+        }
+      } else {
+        // For completion-based goals without values, use simple completion count
+        // Assume target of 1 completion for basic goals
+        progress = completionCount > 0 ? 100 : 0;
       }
-      
-      const completions = await storage.getUserCompletions(userId, startDate, now);
-      const goalCompletions = completions.filter(c => c.goalId === goalId);
-      
-      const completionCount = goalCompletions.length;
-      const progress = Math.min((completionCount / goal.target) * 100, 100);
       
       res.json({
         completionCount,
-        target: goal.target,
         progress: Math.round(progress),
-        period: goal.frequency,
+        currentValue,
+        startingValue: goal.startingValue,
+        targetValue: goal.targetValue,
+        unit: goal.unit,
       });
     } catch (error) {
       console.error("Error calculating progress:", error);

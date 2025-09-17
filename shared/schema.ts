@@ -61,6 +61,7 @@ export const goalCompletions = pgTable("goal_completions", {
   userId: varchar("user_id").notNull().references(() => users.id),
   completedAt: timestamp("completed_at").defaultNow(),
   completedDate: date("completed_date").notNull(), // For streak calculations
+  value: integer("value"), // Optional: actual value for progress tracking (e.g., weight, amount)
 });
 
 // Schema types

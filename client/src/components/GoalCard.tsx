@@ -10,6 +10,7 @@ interface GoalCardProps {
   streak: number;
   progress: number;
   completionCount: number;
+  currentValue?: number;
   onComplete?: (goalId: string) => void;
   onEdit?: (goal: Goal) => void;
   onDelete?: (goalId: string) => void;
@@ -20,6 +21,7 @@ export function GoalCard({
   streak, 
   progress, 
   completionCount,
+  currentValue,
   onComplete,
   onEdit,
   onDelete 
@@ -90,8 +92,14 @@ export function GoalCard({
   };
 
   const getCurrentValueText = () => {
-    if (!goal.unit || goal.startingValue === null || goal.startingValue === undefined) return null;
-    return `Current ${goal.unit === 'lbs' ? 'weight' : goal.unit}: ${goal.startingValue} ${goal.unit}`;
+    if (!goal.unit) return null;
+    const displayValue = currentValue !== null && currentValue !== undefined ? currentValue : goal.startingValue;
+    if (displayValue === null || displayValue === undefined) return null;
+    return `Current ${goal.unit === 'lbs' ? 'weight' : goal.unit}: ${displayValue} ${goal.unit}`;
+  };
+
+  const getDisplayCurrentValue = () => {
+    return currentValue !== null && currentValue !== undefined ? currentValue : (goal.startingValue || 0);
   };
 
   const getCategoryDotColor = (category: string) => {
@@ -140,7 +148,7 @@ export function GoalCard({
         {goal.unit && goal.targetValue && (
           <div className="space-y-2">
             <div className="text-sm font-medium" data-testid={`goal-progress-text-${goal.id}`}>
-              {goal.startingValue || 0} / {goal.targetValue} {goal.unit}
+              {getDisplayCurrentValue()} / {goal.targetValue} {goal.unit}
             </div>
             <Progress 
               value={progress} 

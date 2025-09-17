@@ -343,6 +343,7 @@ export default function Dashboard() {
                   progress: 0,
                   completionCount: 0,
                   currentStreak: 0,
+                  currentValue: null,
                 };
                 
                 return (
@@ -352,6 +353,7 @@ export default function Dashboard() {
                     streak={progressData.currentStreak}
                     progress={progressData.progress}
                     completionCount={progressData.completionCount}
+                    currentValue={progressData.currentValue}
                     onComplete={handleCompleteGoal}
                     onEdit={handleEditGoal}
                     onDelete={handleDeleteGoal}

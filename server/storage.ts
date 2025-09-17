@@ -26,7 +26,7 @@ export interface IStorage {
   getGoal(goalId: string, userId: string): Promise<Goal | undefined>;
   
   // Goal completion operations
-  completeGoal(goalId: string, userId: string, completedDate: string): Promise<GoalCompletion>;
+  completeGoal(goalId: string, userId: string, completedDate: string, value?: number): Promise<GoalCompletion>;
   getGoalCompletions(goalId: string): Promise<GoalCompletion[]>;
   getUserCompletions(userId: string, startDate?: Date, endDate?: Date): Promise<GoalCompletion[]>;
   getUserStats(userId: string): Promise<{
@@ -102,13 +102,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Goal completion operations
-  async completeGoal(goalId: string, userId: string, completedDate: string): Promise<GoalCompletion> {
+  async completeGoal(goalId: string, userId: string, completedDate: string, value?: number): Promise<GoalCompletion> {
     const [completion] = await db
       .insert(goalCompletions)
       .values({
         goalId,
         userId,
         completedDate,
+        value,
       })
       .returning();
     return completion;
