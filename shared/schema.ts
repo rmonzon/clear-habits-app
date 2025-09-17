@@ -42,10 +42,13 @@ export const goals = pgTable("goals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
   title: text("title").notNull(),
-  description: text("description"),
   category: text("category").notNull().default("general"),
-  frequency: text("frequency").notNull(), // daily, weekly, monthly, yearly
-  target: integer("target").notNull().default(1), // How many times per frequency period
+  targetDate: date("target_date"),
+  status: text("status").notNull().default("not_started"), // not_started, in_progress, completed
+  priorityLevel: text("priority_level").notNull().default("medium"), // low, medium, high
+  unit: text("unit"), // lbs, money, time, count (optional)
+  startingValue: integer("starting_value"), // optional
+  targetValue: integer("target_value"), // optional
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

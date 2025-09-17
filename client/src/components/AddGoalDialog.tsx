@@ -2,7 +2,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -22,10 +21,13 @@ export function AddGoalDialog({ onAdd, trigger }: AddGoalDialogProps) {
     resolver: zodResolver(insertGoalSchema),
     defaultValues: {
       title: "",
-      description: "",
       category: "general",
-      frequency: "daily",
-      target: 1,
+      targetDate: undefined,
+      status: "not_started",
+      priorityLevel: "medium",
+      unit: undefined,
+      startingValue: undefined,
+      targetValue: undefined,
       isActive: true,
     },
   });
@@ -52,6 +54,7 @@ export function AddGoalDialog({ onAdd, trigger }: AddGoalDialogProps) {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Title Field */}
             <FormField
               control={form.control}
               name="title"
@@ -70,18 +73,45 @@ export function AddGoalDialog({ onAdd, trigger }: AddGoalDialogProps) {
               )}
             />
             
+            {/* Category Field */}
             <FormField
               control={form.control}
-              name="description"
+              name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormLabel>Category</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-goal-category">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="health">Health</SelectItem>
+                      <SelectItem value="finance">Finance</SelectItem>
+                      <SelectItem value="learning">Learning</SelectItem>
+                      <SelectItem value="personal">Personal</SelectItem>
+                      <SelectItem value="general">General</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Target Date Field */}
+            <FormField
+              control={form.control}
+              name="targetDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Target Date (Deadline)</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Enter goal description"
+                    <Input 
+                      type="date"
                       {...field}
                       value={field.value || ''}
-                      data-testid="input-goal-description"
+                      data-testid="input-goal-target-date"
                     />
                   </FormControl>
                   <FormMessage />
@@ -90,25 +120,23 @@ export function AddGoalDialog({ onAdd, trigger }: AddGoalDialogProps) {
             />
             
             <div className="grid grid-cols-2 gap-4">
+              {/* Status Field */}
               <FormField
                 control={form.control}
-                name="category"
+                name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel>Status</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger data-testid="select-goal-category">
-                          <SelectValue placeholder="Select category" />
+                        <SelectTrigger data-testid="select-goal-status">
+                          <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="general">General</SelectItem>
-                        <SelectItem value="health">Health</SelectItem>
-                        <SelectItem value="fitness">Fitness</SelectItem>
-                        <SelectItem value="learning">Learning</SelectItem>
-                        <SelectItem value="work">Work</SelectItem>
-                        <SelectItem value="personal">Personal</SelectItem>
+                        <SelectItem value="not_started">Not Started</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -116,23 +144,23 @@ export function AddGoalDialog({ onAdd, trigger }: AddGoalDialogProps) {
                 )}
               />
               
+              {/* Priority Level Field */}
               <FormField
                 control={form.control}
-                name="frequency"
+                name="priorityLevel"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Frequency</FormLabel>
+                    <FormLabel>Priority Level</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger data-testid="select-goal-frequency">
-                          <SelectValue placeholder="Select frequency" />
+                        <SelectTrigger data-testid="select-goal-priority">
+                          <SelectValue placeholder="Select priority" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                        <SelectItem value="yearly">Yearly</SelectItem>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -140,27 +168,83 @@ export function AddGoalDialog({ onAdd, trigger }: AddGoalDialogProps) {
                 )}
               />
             </div>
-            
-            <FormField
-              control={form.control}
-              name="target"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Target (times per period)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      min="1"
-                      placeholder="1"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                      data-testid="input-goal-target"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
+            {/* Optional Fields Section */}
+            <div className="space-y-4 pt-2 border-t">
+              <h4 className="text-sm font-medium text-muted-foreground">Optional Fields</h4>
+              
+              {/* Unit Field */}
+              <FormField
+                control={form.control}
+                name="unit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Unit (Optional)</FormLabel>
+                    <Select onValueChange={(value) => field.onChange(value === "none" ? undefined : value)} value={field.value || "none"}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-goal-unit">
+                          <SelectValue placeholder="Select unit" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        <SelectItem value="lbs">lbs</SelectItem>
+                        <SelectItem value="money">money</SelectItem>
+                        <SelectItem value="time">time</SelectItem>
+                        <SelectItem value="count">count</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Starting Value Field */}
+                <FormField
+                  control={form.control}
+                  name="startingValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Starting Value (Optional)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number"
+                          placeholder="0"
+                          {...field}
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          data-testid="input-goal-starting-value"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                {/* Target Value Field */}
+                <FormField
+                  control={form.control}
+                  name="targetValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Target Value (Optional)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number"
+                          placeholder="100"
+                          {...field}
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          data-testid="input-goal-target-value"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
             
             <div className="flex justify-end space-x-2 pt-4">
               <Button 
@@ -171,7 +255,7 @@ export function AddGoalDialog({ onAdd, trigger }: AddGoalDialogProps) {
               >
                 Cancel
               </Button>
-              <Button type="submit" data-testid="button-save-goal">
+              <Button type="submit" data-testid="button-create-goal">
                 Add Goal
               </Button>
             </div>
