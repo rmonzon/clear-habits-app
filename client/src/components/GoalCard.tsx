@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Edit, Flame, Calendar } from "lucide-react";
 import type { Goal } from "@shared/schema";
+import { LogProgressDialog } from "./LogProgressDialog";
 
 interface GoalCardProps {
   goal: Goal;
@@ -12,6 +13,7 @@ interface GoalCardProps {
   completionCount: number;
   currentValue?: number;
   onComplete?: (goalId: string) => void;
+  onLogProgress?: (goalId: string, value: number) => void;
   onEdit?: (goal: Goal) => void;
   onDelete?: (goalId: string) => void;
 }
@@ -23,6 +25,7 @@ export function GoalCard({
   completionCount,
   currentValue,
   onComplete,
+  onLogProgress,
   onEdit,
   onDelete 
 }: GoalCardProps) {
@@ -183,14 +186,21 @@ export function GoalCard({
               <Edit className="w-3 h-3 mr-1" />
               Edit
             </Button>
-            <Button
-              size="sm"
-              onClick={() => onComplete?.(goal.id)}
-              disabled={goal.status === 'completed'}
-              data-testid={`button-complete-${goal.id}`}
-            >
-              {goal.status === 'completed' ? 'Completed' : 'Log Progress'}
-            </Button>
+            {goal.unit && goal.targetValue && onLogProgress ? (
+              <LogProgressDialog 
+                goal={goal}
+                onLogProgress={onLogProgress}
+              />
+            ) : (
+              <Button
+                size="sm"
+                onClick={() => onComplete?.(goal.id)}
+                disabled={goal.status === 'completed'}
+                data-testid={`button-complete-${goal.id}`}
+              >
+                {goal.status === 'completed' ? 'Completed' : 'Complete'}
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>
