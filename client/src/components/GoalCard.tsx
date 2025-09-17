@@ -1,8 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, CheckCircle, Edit, Clock, Target, Trash2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Edit, Flame, Calendar } from "lucide-react";
 import type { Goal } from "@shared/schema";
 
 interface GoalCardProps {
@@ -77,70 +77,70 @@ export function GoalCard({
     return colors[category as keyof typeof colors] || colors.general;
   };
 
+  const getDaysLeft = (targetDate: string | null) => {
+    if (!targetDate) return null;
+    const target = new Date(targetDate);
+    const now = new Date();
+    // Normalize to midnight for accurate day comparison
+    target.setHours(0, 0, 0, 0);
+    now.setHours(0, 0, 0, 0);
+    const diffTime = target.getTime() - now.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const getCurrentValueText = () => {
+    if (!goal.unit || goal.startingValue === null || goal.startingValue === undefined) return null;
+    return `Current ${goal.unit === 'lbs' ? 'weight' : goal.unit}: ${goal.startingValue} ${goal.unit}`;
+  };
+
+  const getCategoryDotColor = (category: string) => {
+    const colors = {
+      health: 'bg-green-500',
+      finance: 'bg-blue-500',
+      learning: 'bg-purple-500',
+      personal: 'bg-pink-500',
+      general: 'bg-gray-500'
+    };
+    return colors[category as keyof typeof colors] || colors.general;
+  };
+
+  const daysLeft = getDaysLeft(goal.targetDate);
+
   return (
     <Card className="hover-elevate" data-testid={`goal-card-${goal.id}`}>
-      <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
-        <div className="space-y-1 flex-1">
-          <CardTitle className="text-base font-semibold" data-testid={`goal-title-${goal.id}`}>
-            {goal.title}
-          </CardTitle>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="w-3 h-3" />
-            <span>{formatDate(goal.targetDate)}</span>
-            {goal.unit && goal.targetValue && (
-              <>
-                <Target className="w-3 h-3 ml-2" />
-                <span>{goal.startingValue || 0}/{goal.targetValue} {goal.unit}</span>
-              </>
-            )}
-          </div>
-        </div>
-        <div className="flex items-center gap-1">
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => onEdit?.(goal)}
-            data-testid={`button-edit-${goal.id}`}
-          >
-            <Edit className="w-4 h-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => onDelete?.(goal.id)}
-            data-testid={`button-delete-${goal.id}`}
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="p-4 space-y-4">
+        {/* Top row: Category badge with dot and streak with flame */}
         <div className="flex items-center justify-between">
-          <Badge className={getCategoryColor(goal.category)} data-testid={`goal-category-${goal.id}`}>
-            {goal.category}
-          </Badge>
-          <div className="flex items-center gap-1 text-sm font-medium">
-            <Clock className="w-4 h-4 text-orange-500" />
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${getCategoryDotColor(goal.category)}`}></div>
+            <Badge className={getCategoryColor(goal.category)} data-testid={`goal-category-${goal.id}`}>
+              {goal.category.charAt(0).toUpperCase() + goal.category.slice(1)}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
+            <Flame className="w-4 h-4 text-orange-500" />
             <span data-testid={`goal-streak-${goal.id}`}>{streak}</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Badge className={getStatusColor(goal.status)} data-testid={`goal-status-${goal.id}`}>
-            {getStatusText(goal.status)}
-          </Badge>
-          <Badge className={getPriorityColor(goal.priorityLevel)} data-testid={`goal-priority-${goal.id}`}>
-            {getPriorityText(goal.priorityLevel)}
-          </Badge>
+        {/* Title */}
+        <div>
+          <h3 className="text-lg font-semibold text-foreground" data-testid={`goal-title-${goal.id}`}>
+            {goal.title}
+          </h3>
+          {getCurrentValueText() && (
+            <p className="text-sm text-muted-foreground mt-1">
+              {getCurrentValueText()}
+            </p>
+          )}
         </div>
 
+        {/* Progress section */}
         {goal.unit && goal.targetValue && (
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span>Progress</span>
-              <span data-testid={`goal-progress-text-${goal.id}`}>
-                {goal.startingValue || 0}/{goal.targetValue} {goal.unit}
-              </span>
+            <div className="text-sm font-medium" data-testid={`goal-progress-text-${goal.id}`}>
+              {goal.startingValue || 0} / {goal.targetValue} {goal.unit}
             </div>
             <Progress 
               value={progress} 
@@ -150,18 +150,41 @@ export function GoalCard({
           </div>
         )}
 
-        <Button 
-          onClick={() => onComplete?.(goal.id)}
-          className="w-full"
-          disabled={goal.status === 'completed'}
-          data-testid={`button-complete-${goal.id}`}
-        >
-          {goal.status === 'completed' ? (
-            <><CheckCircle2 className="w-4 h-4 mr-2" />Completed!</>
-          ) : (
-            <><CheckCircle className="w-4 h-4 mr-2" />Mark Complete</>
-          )}
-        </Button>
+        {/* Bottom row: Days left and action buttons */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <Calendar className="w-3 h-3" />
+            <span data-testid={`goal-days-left-${goal.id}`}>
+              {daysLeft !== null 
+                ? daysLeft > 0 
+                  ? `${daysLeft} days left`
+                  : daysLeft === 0 
+                    ? 'Due today'
+                    : `${Math.abs(daysLeft)} days overdue`
+                : 'No deadline'
+              }
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onEdit?.(goal)}
+              data-testid={`button-edit-${goal.id}`}
+            >
+              <Edit className="w-3 h-3 mr-1" />
+              Edit
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => onComplete?.(goal.id)}
+              disabled={goal.status === 'completed'}
+              data-testid={`button-complete-${goal.id}`}
+            >
+              {goal.status === 'completed' ? 'Completed' : 'Log Progress'}
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
