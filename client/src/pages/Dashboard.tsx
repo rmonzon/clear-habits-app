@@ -233,8 +233,7 @@ export default function Dashboard() {
   }
 
   const filteredGoals = goals.filter(goal => {
-    const matchesSearch = goal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         goal.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = goal.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === "all" || goal.category === categoryFilter;
     return matchesSearch && matchesCategory && goal.isActive;
   });
