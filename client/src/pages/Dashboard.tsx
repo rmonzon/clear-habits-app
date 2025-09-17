@@ -126,6 +126,32 @@ export default function Dashboard() {
     },
   });
 
+  // Log progress mutation
+  const logProgressMutation = useMutation({
+    mutationFn: async ({ goalId, value }: { goalId: string; value: number }) => {
+      return await apiRequest('POST', `/api/goals/${goalId}/complete`, { 
+        value, 
+        completedDate: new Date().toISOString().split('T')[0] 
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/goals/progress'] });
+      toast({
+        title: "Progress Logged!",
+        description: "Your progress has been recorded successfully!",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to log progress",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Delete goal mutation
   const deleteGoalMutation = useMutation({
     mutationFn: async (goalId: string) => {
@@ -159,6 +185,10 @@ export default function Dashboard() {
 
   const handleCompleteGoal = (goalId: string) => {
     completeGoalMutation.mutate(goalId);
+  };
+
+  const handleLogProgress = (goalId: string, value: number) => {
+    logProgressMutation.mutate({ goalId, value });
   };
 
   const handleEditGoal = (goal: Goal) => {
@@ -355,6 +385,7 @@ export default function Dashboard() {
                     completionCount={progressData.completionCount}
                     currentValue={progressData.currentValue}
                     onComplete={handleCompleteGoal}
+                    onLogProgress={handleLogProgress}
                     onEdit={handleEditGoal}
                     onDelete={handleDeleteGoal}
                   />
