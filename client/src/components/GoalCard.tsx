@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Edit, Flame, Calendar } from "lucide-react";
+import { Edit, Flame, Calendar, Trash2 } from "lucide-react";
 import type { Goal } from "@shared/schema";
 import { LogProgressDialog } from "./LogProgressDialog";
 
@@ -185,6 +185,15 @@ export function GoalCard({
             >
               <Edit className="w-3 h-3 mr-1" />
               Edit
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onDelete?.(goal.id)}
+              data-testid={`button-delete-${goal.id}`}
+            >
+              <Trash2 className="w-3 h-3 mr-1" />
+              Delete
             </Button>
             {goal.unit && goal.targetValue && onLogProgress ? (
               <LogProgressDialog 
