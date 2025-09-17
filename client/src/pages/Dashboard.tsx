@@ -84,7 +84,7 @@ export default function Dashboard() {
   // Add goal mutation
   const addGoalMutation = useMutation({
     mutationFn: async (goalData: InsertGoal) => {
-      return await apiRequest('/api/goals', 'POST', goalData);
+      return await apiRequest('POST', '/api/goals', goalData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
@@ -106,7 +106,7 @@ export default function Dashboard() {
   // Complete goal mutation
   const completeGoalMutation = useMutation({
     mutationFn: async (goalId: string) => {
-      return await apiRequest(`/api/goals/${goalId}/complete`, 'POST', { completedDate: new Date().toISOString().split('T')[0] });
+      return await apiRequest('POST', `/api/goals/${goalId}/complete`, { completedDate: new Date().toISOString().split('T')[0] });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
@@ -129,7 +129,7 @@ export default function Dashboard() {
   // Delete goal mutation
   const deleteGoalMutation = useMutation({
     mutationFn: async (goalId: string) => {
-      return await apiRequest(`/api/goals/${goalId}`, 'DELETE');
+      return await apiRequest('DELETE', `/api/goals/${goalId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
