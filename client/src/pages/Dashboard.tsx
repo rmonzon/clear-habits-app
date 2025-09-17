@@ -148,6 +148,31 @@ export default function Dashboard() {
     },
   });
 
+  // Define all handlers first to avoid temporal dead zone issues
+  const handleLogout = () => {
+    window.location.href = '/api/logout';
+  };
+
+  const handleAddGoal = (goalData: InsertGoal) => {
+    addGoalMutation.mutate(goalData);
+  };
+
+  const handleCompleteGoal = (goalId: string) => {
+    completeGoalMutation.mutate(goalId);
+  };
+
+  const handleEditGoal = (goal: Goal) => {
+    // TODO: Implement edit functionality
+    toast({
+      title: "Coming Soon",
+      description: "Goal editing feature will be available soon!",
+    });
+  };
+
+  const handleDeleteGoal = (goalId: string) => {
+    deleteGoalMutation.mutate(goalId);
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background" data-testid="dashboard-loading">
@@ -213,30 +238,6 @@ export default function Dashboard() {
     const matchesCategory = categoryFilter === "all" || goal.category === categoryFilter;
     return matchesSearch && matchesCategory && goal.isActive;
   });
-
-  const handleLogout = () => {
-    window.location.href = '/api/logout';
-  };
-
-  const handleAddGoal = (goalData: InsertGoal) => {
-    addGoalMutation.mutate(goalData);
-  };
-
-  const handleCompleteGoal = (goalId: string) => {
-    completeGoalMutation.mutate(goalId);
-  };
-
-  const handleEditGoal = (goal: Goal) => {
-    // TODO: Implement edit functionality
-    toast({
-      title: "Coming Soon",
-      description: "Goal editing feature will be available soon!",
-    });
-  };
-
-  const handleDeleteGoal = (goalId: string) => {
-    deleteGoalMutation.mutate(goalId);
-  };
 
   // Calculate current streak for motivational message
   const currentStreaks = Array.from(goalProgress.values())
