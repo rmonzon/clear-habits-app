@@ -79,7 +79,8 @@ export function AddGoalDialog({ onAdd, trigger }: AddGoalDialogProps) {
                   <FormControl>
                     <Textarea 
                       placeholder="Enter goal description"
-                      {...field} 
+                      {...field}
+                      value={field.value || ''}
                       data-testid="input-goal-description"
                     />
                   </FormControl>
