@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { SignInButton } from '@clerk/clerk-react';
 import {
   Target,
   TrendingUp,
@@ -275,7 +276,7 @@ export default function Dashboard() {
         className="min-h-screen bg-background"
         data-testid="dashboard-unauthenticated"
       >
-        <NavigationHeader user={null} />
+        <NavigationHeader />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="text-center space-y-4">
@@ -291,12 +292,11 @@ export default function Dashboard() {
                   lasting progress.
                 </p>
               </div>
-              <Button
-                onClick={() => (window.location.href = "/api/login")}
-                data-testid="button-login-prompt"
-              >
-                Sign In to Continue
-              </Button>
+              <SignInButton mode="modal">
+                <Button data-testid="button-login-prompt">
+                  Sign In to Continue
+                </Button>
+              </SignInButton>
             </div>
           </div>
         </div>
@@ -310,7 +310,7 @@ export default function Dashboard() {
         className="min-h-screen bg-background"
         data-testid="dashboard-loading-goals"
       >
-        <NavigationHeader user={user} onLogout={handleLogout} />
+        <NavigationHeader />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="text-center space-y-2">
@@ -345,7 +345,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background" data-testid="dashboard-page">
-      <NavigationHeader user={user} onLogout={handleLogout} />
+      <NavigationHeader />
 
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Welcome Message */}

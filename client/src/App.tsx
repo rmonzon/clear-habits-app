@@ -3,23 +3,26 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuth } from "@/hooks/useAuth";
+import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-react';
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
 import NotFound from "@/pages/not-found";
 
-function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
+if (!clerkPubKey) {
+  throw new Error("Missing Publishable Key");
+}
+
+function Router() {
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
+      <SignedOut>
         <Route path="/" component={Landing} />
-      ) : (
-        <>
-          <Route path="/" component={Dashboard} />
-        </>
-      )}
+      </SignedOut>
+      <SignedIn>
+        <Route path="/" component={Dashboard} />
+      </SignedIn>
       <Route component={NotFound} />
     </Switch>
   );
@@ -27,12 +30,14 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Router />
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ClerkProvider publishableKey={clerkPubKey}>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Router />
+          <Toaster />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ClerkProvider>
   );
 }
 

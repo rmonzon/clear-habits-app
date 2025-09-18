@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NavigationHeader } from "@/components/NavigationHeader";
+import { SignInButton } from '@clerk/clerk-react';
 import {
   Target,
   TrendingUp,
@@ -81,14 +82,15 @@ export default function Landing() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button
-                  size="lg"
-                  onClick={() => (window.location.href = "/api/login")}
-                  data-testid="button-get-started"
-                  className="text-lg px-8"
-                >
-                  Get Started Free
-                </Button>
+                <SignInButton mode="modal">
+                  <Button
+                    size="lg"
+                    data-testid="button-get-started"
+                    className="text-lg px-8"
+                  >
+                    Get Started Free
+                  </Button>
+                </SignInButton>
                 <Button
                   size="lg"
                   variant="outline"
@@ -160,14 +162,15 @@ export default function Landing() {
               Join thousands of people who are already transforming their lives,
               one habit at a time.
             </p>
-            <Button
-              size="lg"
-              onClick={() => (window.location.href = "/api/login")}
-              data-testid="button-start-journey"
-              className="text-lg px-8"
-            >
-              Start Your Journey
-            </Button>
+            <SignInButton mode="modal">
+              <Button
+                size="lg"
+                data-testid="button-start-journey"
+                className="text-lg px-8"
+              >
+                Start Your Journey
+              </Button>
+            </SignInButton>
           </div>
         </div>
       </section>
