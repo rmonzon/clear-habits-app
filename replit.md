@@ -1,6 +1,6 @@
 # Overview
 
-HabitFlow is a personal habit tracking application that helps users build lasting habits through goal setting, progress visualization, and streak tracking. The application features a clean, modern interface with Material Design principles, allowing users to create daily, weekly, monthly, or yearly habits with custom targets and categories. Users can track their progress with intuitive visualizations including progress bars, streak counters, and completion statistics.
+ClearHabits is a personal habit tracking application that helps users build lasting habits through goal setting, progress visualization, and streak tracking. The application features a clean, modern interface with Material Design principles, allowing users to create daily, weekly, monthly, or yearly habits with custom targets and categories. Users can track their progress with intuitive visualizations including progress bars, streak counters, and completion statistics.
 
 # User Preferences
 
