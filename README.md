@@ -43,9 +43,9 @@ These instructions will get you a copy of the project up and running on your loc
 
 ```bash
 # clone the repo
-git clone https://github.com/rmonzon/goals-tracker.git
+git clone https://github.com/rmonzon/clear-habits-app.git
 
-cd goals-tracker
+cd clear-habits-app
 
 # install dependencies
 npm install
