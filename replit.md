@@ -29,9 +29,9 @@ Preferred communication style: Simple, everyday language.
 - **Connection**: Connection pooling with neon-serverless client
 
 ## Authentication System
-- **Provider**: Replit Auth with OpenID Connect
-- **Session Management**: Express sessions with PostgreSQL session store
-- **Security**: Secure HTTP-only cookies with CSRF protection
+- **Provider**: Supabase Authentication
+- **Session Management**: Stateless JWT token authentication
+- **Security**: Bearer token authorization with JWT verification
 - **User Management**: Automatic user creation/updates on authentication
 
 ## Core Data Models
@@ -54,8 +54,8 @@ Preferred communication style: Simple, everyday language.
 - **Database URL**: Environment-based configuration for database connections
 
 ## Authentication Services  
-- **Replit Auth**: OpenID Connect provider for user authentication
-- **Session Storage**: PostgreSQL-backed session management
+- **Supabase Auth**: JWT-based authentication provider
+- **Token Management**: Stateless authentication with Bearer tokens
 
 ## Development Tools
 - **Vite**: Frontend build tool with HMR and development server

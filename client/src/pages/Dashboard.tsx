@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueries, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import {
   Target,
@@ -65,36 +65,33 @@ export default function Dashboard() {
     enabled: !!user,
   });
 
-  // Fetch progress and streak data for each goal
-  const { data: goalProgress = new Map() } = useQuery({
-    queryKey: ["/api/goals/progress"],
-    enabled: goals.length > 0,
-    queryFn: async () => {
-      const progressMap = new Map();
-      await Promise.all(
-        goals.map(async (goal) => {
-          try {
-            const [progressRes, streakRes] = await Promise.all([
-              fetch(`/api/goals/${goal.id}/progress`).then((res) => res.json()),
-              fetch(`/api/goals/${goal.id}/streak`).then((res) => res.json()),
-            ]);
-            progressMap.set(goal.id, {
-              ...progressRes,
-              ...streakRes,
-            });
-          } catch (error) {
-            console.error(`Error fetching data for goal ${goal.id}:`, error);
-            progressMap.set(goal.id, {
-              progress: 0,
-              completionCount: 0,
-              currentStreak: 0,
-              longestStreak: 0,
-            });
-          }
-        }),
-      );
-      return progressMap;
-    },
+  // Use useQueries to avoid Rules of Hooks violations when goals list changes
+  const goalDataQueries = useQueries({
+    queries: goals.flatMap((goal) => [
+      {
+        queryKey: ['/api/goals', goal.id, 'progress'],
+        enabled: !!user && !!goal.id,
+      },
+      {
+        queryKey: ['/api/goals', goal.id, 'streak'], 
+        enabled: !!user && !!goal.id,
+      }
+    ])
+  });
+
+  // Combine progress and streak data
+  const goalProgress = new Map();
+  goals.forEach((goal, index) => {
+    const progressIndex = index * 2;
+    const streakIndex = index * 2 + 1;
+    const progressData = goalDataQueries[progressIndex]?.data;
+    const streakData = goalDataQueries[streakIndex]?.data;
+    if (progressData && streakData) {
+      goalProgress.set(goal.id, {
+        ...progressData,
+        ...streakData,
+      });
+    }
   });
 
   // Add goal mutation
@@ -129,7 +126,14 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/goals/progress"] });
+      // Invalidate all progress and streak queries
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          return Array.isArray(query.queryKey) && 
+                 query.queryKey[0] === '/api/goals' && 
+                 (query.queryKey[2] === 'progress' || query.queryKey[2] === 'streak');
+        }
+      });
       toast({
         title: "Goal Completed!",
         description: "Great job! Keep up the momentum!",
@@ -161,7 +165,14 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/goals/progress"] });
+      // Invalidate all progress and streak queries
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          return Array.isArray(query.queryKey) && 
+                 query.queryKey[0] === '/api/goals' && 
+                 (query.queryKey[2] === 'progress' || query.queryKey[2] === 'streak');
+        }
+      });
       toast({
         title: "Progress Logged!",
         description: "Your progress has been recorded successfully!",
@@ -190,7 +201,14 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/goals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/goals/progress"] });
+      // Invalidate all progress and streak queries
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          return Array.isArray(query.queryKey) && 
+                 query.queryKey[0] === '/api/goals' && 
+                 (query.queryKey[2] === 'progress' || query.queryKey[2] === 'streak');
+        }
+      });
       toast({
         title: "Goal Updated",
         description: "Your goal has been updated successfully!",
