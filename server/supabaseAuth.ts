@@ -6,6 +6,10 @@ if (!process.env.SUPABASE_JWT_SECRET) {
   throw new Error("Environment variable SUPABASE_JWT_SECRET not provided");
 }
 
+if (!process.env.SUPABASE_URL) {
+  throw new Error("Environment variable SUPABASE_URL not provided");
+}
+
 interface SupabaseJwtPayload {
   sub: string;
   email?: string;
@@ -29,7 +33,12 @@ export const isAuthenticated: RequestHandler = async (req: any, res, next) => {
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
     
-    const decoded = jwt.verify(token, process.env.SUPABASE_JWT_SECRET!) as SupabaseJwtPayload;
+    const decoded = jwt.verify(token, process.env.SUPABASE_JWT_SECRET!, {
+      algorithms: ["HS256"],
+      issuer: `${process.env.SUPABASE_URL}/auth/v1`,
+      audience: "authenticated",
+      clockTolerance: 5
+    }) as SupabaseJwtPayload;
     
     // Upsert user in our database
     await storage.upsertUser({

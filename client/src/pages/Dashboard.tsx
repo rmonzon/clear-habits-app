@@ -4,6 +4,7 @@ import { StatsCard } from "@/components/StatsCard";
 import { GoalCard } from "@/components/GoalCard";
 import { AddGoalDialog } from "@/components/AddGoalDialog";
 import { MotivationalMessage } from "@/components/MotivationalMessage";
+import { LoginModal } from "@/components/auth/LoginModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -41,14 +42,16 @@ interface UserStats {
 }
 
 export default function Dashboard() {
-  const { user, isLoading: authLoading } = useAuth() as {
+  const { user, isLoading: authLoading, signOut } = useAuth() as {
     user: User | undefined;
     isLoading: boolean;
+    signOut: () => Promise<{ error: any }>;
   };
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   // Fetch user goals
   const { data: goals = [], isLoading: goalsLoading } = useQuery<Goal[]>({
@@ -225,8 +228,10 @@ export default function Dashboard() {
   });
 
   // Define all handlers first to avoid temporal dead zone issues
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
+  const handleLogout = async () => {
+    await signOut();
+    // Clear cached data after sign out
+    queryClient.clear();
   };
 
   const handleAddGoal = (goalData: InsertGoal) => {
@@ -292,7 +297,7 @@ export default function Dashboard() {
                 </p>
               </div>
               <Button
-                onClick={() => (window.location.href = "/api/login")}
+                onClick={() => setIsLoginModalOpen(true)}
                 data-testid="button-login-prompt"
               >
                 Sign In to Continue
@@ -490,6 +495,10 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+      <LoginModal 
+        open={isLoginModalOpen} 
+        onOpenChange={setIsLoginModalOpen} 
+      />
     </div>
   );
 }

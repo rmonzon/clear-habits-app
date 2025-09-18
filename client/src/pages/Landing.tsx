@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NavigationHeader } from "@/components/NavigationHeader";
+import { LoginModal } from "@/components/auth/LoginModal";
 import {
   Target,
   TrendingUp,
@@ -11,6 +13,8 @@ import {
 } from "lucide-react";
 
 export default function Landing() {
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
   const features = [
     {
       icon: Target,
@@ -83,7 +87,7 @@ export default function Landing() {
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Button
                   size="lg"
-                  onClick={() => (window.location.href = "/api/login")}
+                  onClick={() => setIsLoginModalOpen(true)}
                   data-testid="button-get-started"
                   className="text-lg px-8"
                 >
@@ -162,7 +166,7 @@ export default function Landing() {
             </p>
             <Button
               size="lg"
-              onClick={() => (window.location.href = "/api/login")}
+              onClick={() => setIsLoginModalOpen(true)}
               data-testid="button-start-journey"
               className="text-lg px-8"
             >
@@ -185,6 +189,10 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+      <LoginModal 
+        open={isLoginModalOpen} 
+        onOpenChange={setIsLoginModalOpen} 
+      />
     </div>
   );
 }
