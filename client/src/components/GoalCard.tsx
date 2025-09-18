@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Edit, Flame, Calendar, Trash2 } from "lucide-react";
-import type { Goal } from "@shared/schema";
+import type { Goal, InsertGoal } from "@shared/schema";
 import { LogProgressDialog } from "./LogProgressDialog";
+import { EditGoalDialog } from "./EditGoalDialog";
 
 interface GoalCardProps {
   goal: Goal;
@@ -14,7 +15,7 @@ interface GoalCardProps {
   currentValue?: number;
   onComplete?: (goalId: string) => void;
   onLogProgress?: (goalId: string, value: number) => void;
-  onEdit?: (goal: Goal) => void;
+  onEdit?: (goalId: string, goalData: Partial<InsertGoal>) => void;
   onDelete?: (goalId: string) => void;
 }
 
@@ -177,15 +178,10 @@ export function GoalCard({
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onEdit?.(goal)}
-              data-testid={`button-edit-${goal.id}`}
-            >
-              <Edit className="w-3 h-3 mr-1" />
-              Edit
-            </Button>
+            <EditGoalDialog 
+              goal={goal}
+              onEdit={onEdit || (() => {})}
+            />
             <Button
               size="sm"
               variant="outline"
