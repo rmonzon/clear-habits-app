@@ -129,6 +129,9 @@ export function GoalCard({
             <Badge className={getCategoryColor(goal.category)} data-testid={`goal-category-${goal.id}`}>
               {goal.category.charAt(0).toUpperCase() + goal.category.slice(1)}
             </Badge>
+            <Badge className={getPriorityColor(goal.priorityLevel)} data-testid={`goal-priority-${goal.id}`}>
+              {getPriorityText(goal.priorityLevel)}
+            </Badge>
           </div>
           <div className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
             <Flame className="w-4 h-4 text-orange-500" />
