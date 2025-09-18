@@ -149,6 +149,19 @@ export function GoalCard({
               {getCurrentValueText()}
             </p>
           )}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+            <Calendar className="w-4 h-4" />
+            <span data-testid={`goal-days-left-${goal.id}`}>
+              {daysLeft !== null 
+                ? daysLeft > 0 
+                  ? `${daysLeft} days left`
+                  : daysLeft === 0 
+                    ? 'Due today'
+                    : `${Math.abs(daysLeft)} days overdue`
+                : 'No deadline'
+              }
+            </span>
+          </div>
         </div>
 
         {/* Progress section */}
@@ -165,22 +178,9 @@ export function GoalCard({
           </div>
         )}
 
-        {/* Bottom row: Days left and action buttons */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
-            <Calendar className="w-4 h-4" />
-            <span data-testid={`goal-days-left-${goal.id}`} className="whitespace-nowrap">
-              {daysLeft !== null 
-                ? daysLeft > 0 
-                  ? `${daysLeft} days left`
-                  : daysLeft === 0 
-                    ? 'Due today'
-                    : `${Math.abs(daysLeft)} days overdue`
-                : 'No deadline'
-              }
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2 w-full sm:w-auto sm:justify-end">
+        {/* Bottom row: Action buttons */}
+        <div className="flex justify-end">
+          <div className="flex flex-wrap gap-2">
             <EditGoalDialog 
               goal={goal}
               onEdit={onEdit || (() => {})}
