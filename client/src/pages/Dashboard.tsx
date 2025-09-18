@@ -48,17 +48,11 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
 
-  // Debug logging
-  console.log('Dashboard - isAuthenticated:', isAuthenticated, 'authLoading:', authLoading);
-
   // Fetch user data from backend
-  const { data: user, isLoading: userLoading, error: userError } = useQuery<User>({
+  const { data: user, isLoading: userLoading } = useQuery<User>({
     queryKey: ["/api/auth/user"],
     enabled: isAuthenticated,
   });
-
-  // Debug logging for user query
-  console.log('Dashboard - user:', user, 'userLoading:', userLoading, 'userError:', userError);
 
   // Fetch user goals
   const { data: goals = [], isLoading: goalsLoading } = useQuery<Goal[]>({
