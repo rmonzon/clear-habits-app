@@ -1,18 +1,18 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupSupabaseAuth, isAuthenticated } from "./supabaseAuth";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertGoalSchema, insertGoalCompletionSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  setupSupabaseAuth(app);
+  await setupAuth(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -24,7 +24,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Goals API
   app.get('/api/goals', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const goals = await storage.getUserGoals(userId);
       res.json(goals);
     } catch (error) {
@@ -35,7 +35,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/goals', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const goalData = insertGoalSchema.parse(req.body);
       const goal = await storage.createGoal(userId, goalData);
       res.status(201).json(goal);
@@ -50,7 +50,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/goals/:goalId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const { goalId } = req.params;
       const goalData = insertGoalSchema.partial().parse(req.body);
       
@@ -71,7 +71,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/goals/:goalId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const { goalId } = req.params;
       
       const success = await storage.deleteGoal(goalId, userId);
@@ -89,7 +89,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Goal completions API
   app.post('/api/goals/:goalId/complete', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const { goalId } = req.params;
       const completedDate = req.body.completedDate || new Date().toISOString().split('T')[0];
       const value = req.body.value; // Optional: actual value for progress tracking
@@ -110,7 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/goals/:goalId/completions', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const { goalId } = req.params;
       
       // Verify goal belongs to user
@@ -130,7 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User stats API
   app.get('/api/stats', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const stats = await storage.getUserStats(userId);
       res.json(stats);
     } catch (error) {
@@ -142,7 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Analytics API - streak calculation
   app.get('/api/goals/:goalId/streak', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const { goalId } = req.params;
       
       // Verify goal belongs to user
@@ -226,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Progress tracking API
   app.get('/api/goals/:goalId/progress', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const { goalId } = req.params;
       
       // Verify goal belongs to user
