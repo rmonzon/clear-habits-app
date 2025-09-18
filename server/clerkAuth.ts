@@ -31,9 +31,10 @@ export const syncUser: RequestHandler = async (req: any, res, next) => {
 };
 
 export async function setupAuth(app: Express) {
-  // Apply Clerk middleware to all routes
+  // Apply Clerk middleware to all routes with JWT support
   app.use(clerkMiddleware({
     secretKey: process.env.CLERK_SECRET_KEY,
+    publishableKey: process.env.CLERK_PUBLISHABLE_KEY, 
   }));
 }
 

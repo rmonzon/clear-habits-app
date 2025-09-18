@@ -48,31 +48,10 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
 
-  // Debug logging to understand the flow
-  console.log('Dashboard render:', { 
-    isAuthenticated, 
-    authLoading, 
-    user: !!user, 
-    firstName: user?.firstName 
-  });
-
-  // Test token retrieval
-  useEffect(() => {
-    const testToken = async () => {
-      try {
-        const token = await getToken();
-        console.log('Token test:', { 
-          hasToken: !!token, 
-          tokenLength: token?.length || 0 
-        });
-      } catch (error) {
-        console.error('Token error:', error);
-      }
-    };
-    if (isAuthenticated) {
-      testToken();
-    }
-  }, [getToken, isAuthenticated]);
+  // Authentication check
+  if (authLoading) {
+    return <div className="p-8 text-center">Loading...</div>;
+  }
 
   // Fetch user data from backend
   const { data: userData, isLoading: userLoading } = useQuery<User>({

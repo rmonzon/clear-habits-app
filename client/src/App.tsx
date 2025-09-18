@@ -18,12 +18,6 @@ if (!clerkPubKey) {
 function Router() {
   const { getToken, isLoaded, isSignedIn } = useAuth();
   
-  // Debug Clerk authentication state  
-  console.log('Clerk Auth State:', {
-    isLoaded,
-    isSignedIn,
-  });
-  
   // Set up the token getter for the query client
   useEffect(() => {
     setTokenGetter(getToken);
@@ -31,11 +25,8 @@ function Router() {
 
   // Show loading state while Clerk loads
   if (!isLoaded) {
-    console.log('Clerk not loaded yet, showing loading...');
     return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>;
   }
-
-  console.log('Rendering routes with authentication state:', { isSignedIn });
 
   return (
     <Switch>
