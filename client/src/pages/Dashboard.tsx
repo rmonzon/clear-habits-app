@@ -42,14 +42,40 @@ interface UserStats {
 }
 
 export default function Dashboard() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading, getToken } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
 
+  // Debug logging to understand the flow
+  console.log('Dashboard render:', { 
+    isAuthenticated, 
+    authLoading, 
+    user: !!user, 
+    firstName: user?.firstName 
+  });
+
+  // Test token retrieval
+  useEffect(() => {
+    const testToken = async () => {
+      try {
+        const token = await getToken();
+        console.log('Token test:', { 
+          hasToken: !!token, 
+          tokenLength: token?.length || 0 
+        });
+      } catch (error) {
+        console.error('Token error:', error);
+      }
+    };
+    if (isAuthenticated) {
+      testToken();
+    }
+  }, [getToken, isAuthenticated]);
+
   // Fetch user data from backend
-  const { data: user, isLoading: userLoading } = useQuery<User>({
+  const { data: userData, isLoading: userLoading } = useQuery<User>({
     queryKey: ["/api/auth/user"],
     enabled: isAuthenticated,
   });
@@ -57,13 +83,13 @@ export default function Dashboard() {
   // Fetch user goals
   const { data: goals = [], isLoading: goalsLoading } = useQuery<Goal[]>({
     queryKey: ["/api/goals"],
-    enabled: !!user,
+    enabled: !!userData,
   });
 
   // Fetch user stats
   const { data: stats } = useQuery<UserStats>({
     queryKey: ["/api/stats"],
-    enabled: !!user,
+    enabled: !!userData,
   });
 
   // Fetch progress and streak data for each goal
@@ -354,7 +380,7 @@ export default function Dashboard() {
         {/* Welcome Message */}
         <div className="space-y-2">
           <h1 className="text-3xl font-bold" data-testid="dashboard-welcome">
-            Welcome back{user?.firstName ? `, ${user.firstName}` : ""}!
+            Welcome back{userData?.firstName ? `, ${userData.firstName}` : ""}!
           </h1>
           <p className="text-muted-foreground">
             Track your progress and build lasting habits.
@@ -365,7 +391,7 @@ export default function Dashboard() {
         <MotivationalMessage
           streak={maxStreak}
           completionsToday={todayCompletions}
-          userName={user?.firstName || "Champion"}
+          userName={userData?.firstName || "Champion"}
         />
 
         {/* Stats Cards */}

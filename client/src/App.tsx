@@ -1,9 +1,10 @@
+import React, { useEffect } from "react";
 import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
+import { queryClient, setTokenGetter } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-react';
+import { ClerkProvider, SignedIn, SignedOut, useAuth } from '@clerk/clerk-react';
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
 import NotFound from "@/pages/not-found";
@@ -15,6 +16,13 @@ if (!clerkPubKey) {
 }
 
 function Router() {
+  const { getToken } = useAuth();
+  
+  // Set up the token getter for the query client
+  useEffect(() => {
+    setTokenGetter(getToken);
+  }, [getToken]);
+
   return (
     <Switch>
       <SignedOut>
