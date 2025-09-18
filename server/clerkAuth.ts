@@ -1,4 +1,4 @@
-import { clerkMiddleware, requireAuth, getAuth, clerkClient } from '@clerk/express';
+import { clerkMiddleware, getAuth, clerkClient } from '@clerk/express';
 import type { Express, RequestHandler } from "express";
 import { storage } from "./storage";
 

@@ -29,10 +29,10 @@ Preferred communication style: Simple, everyday language.
 - **Connection**: Connection pooling with neon-serverless client
 
 ## Authentication System
-- **Provider**: Replit Auth with OpenID Connect
-- **Session Management**: Express sessions with PostgreSQL session store
-- **Security**: Secure HTTP-only cookies with CSRF protection
-- **User Management**: Automatic user creation/updates on authentication
+- **Provider**: Clerk Authentication with complete user management
+- **Session Management**: Clerk handles sessions with automatic token refresh
+- **Security**: Secure authentication with built-in protection against common attacks
+- **User Management**: Automatic user creation/updates on authentication with Clerk user data sync
 
 ## Core Data Models
 - **Users**: Profile information and authentication data
@@ -54,8 +54,8 @@ Preferred communication style: Simple, everyday language.
 - **Database URL**: Environment-based configuration for database connections
 
 ## Authentication Services  
-- **Replit Auth**: OpenID Connect provider for user authentication
-- **Session Storage**: PostgreSQL-backed session management
+- **Clerk**: Modern authentication provider with built-in user management
+- **Session Storage**: Clerk handles secure session management automatically
 
 ## Development Tools
 - **Vite**: Frontend build tool with HMR and development server
