@@ -21,7 +21,10 @@ function Router() {
         <Route path="/" component={Landing} />
       </SignedOut>
       <SignedIn>
-        <Route path="/" component={Dashboard} />
+        <Route path="/" component={() => {
+          console.log('SignedIn route reached - rendering Dashboard');
+          return <Dashboard />;
+        }} />
       </SignedIn>
       <Route component={NotFound} />
     </Switch>

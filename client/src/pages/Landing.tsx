@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NavigationHeader } from "@/components/NavigationHeader";
-import { SignInButton } from '@clerk/clerk-react';
+import { SignInButton, useUser } from '@clerk/clerk-react';
 import {
   Target,
   TrendingUp,
@@ -12,6 +12,11 @@ import {
 } from "lucide-react";
 
 export default function Landing() {
+  const { user, isLoaded } = useUser();
+  
+  // Debug authentication state
+  console.log('Landing - user:', user, 'isLoaded:', isLoaded, 'isAuthenticated:', !!user);
+
   const features = [
     {
       icon: Target,
