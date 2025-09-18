@@ -81,8 +81,8 @@ export default function Dashboard() {
         goals.map(async (goal) => {
           try {
             const [progressRes, streakRes] = await Promise.all([
-              fetch(`/api/goals/${goal.id}/progress`).then((res) => res.json()),
-              fetch(`/api/goals/${goal.id}/streak`).then((res) => res.json()),
+              apiRequest("GET", `/api/goals/${goal.id}/progress`).then((res) => res.json()),
+              apiRequest("GET", `/api/goals/${goal.id}/streak`).then((res) => res.json()),
             ]);
             progressMap.set(goal.id, {
               ...progressRes,
