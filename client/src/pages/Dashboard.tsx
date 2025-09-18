@@ -42,14 +42,17 @@ interface UserStats {
 }
 
 export default function Dashboard() {
-  const { user, isLoading: authLoading } = useAuth() as {
-    user: User | undefined;
-    isLoading: boolean;
-  };
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+
+  // Fetch user data from backend
+  const { data: user, isLoading: userLoading } = useQuery<User>({
+    queryKey: ["/api/auth/user"],
+    enabled: isAuthenticated,
+  });
 
   // Fetch user goals
   const { data: goals = [], isLoading: goalsLoading } = useQuery<Goal[]>({
@@ -250,7 +253,7 @@ export default function Dashboard() {
     deleteGoalMutation.mutate(goalId);
   };
 
-  if (authLoading) {
+  if (authLoading || userLoading) {
     return (
       <div
         className="min-h-screen bg-background"
@@ -270,7 +273,7 @@ export default function Dashboard() {
   }
 
   // If not authenticated, show login prompt
-  if (!user) {
+  if (!isAuthenticated) {
     return (
       <div
         className="min-h-screen bg-background"
