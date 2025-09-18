@@ -1,8 +1,27 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Edit } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,7 +36,7 @@ interface EditGoalDialogProps {
 
 export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
   const [open, setOpen] = useState(false);
-  
+
   const form = useForm<InsertGoal>({
     resolver: zodResolver(insertGoalSchema),
     defaultValues: {
@@ -43,13 +62,20 @@ export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button size="sm" variant="outline" data-testid={`button-edit-${goal.id}`}>
+          <Button
+            size="sm"
+            variant="outline"
+            data-testid={`button-edit-${goal.id}`}
+          >
             <Edit className="w-3 h-3 mr-1" />
             Edit
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]" data-testid={`dialog-edit-goal-${goal.id}`}>
+      <DialogContent
+        className="sm:max-w-[425px]"
+        data-testid={`dialog-edit-goal-${goal.id}`}
+      >
         <DialogHeader>
           <DialogTitle>Edit Goal</DialogTitle>
         </DialogHeader>
@@ -63,9 +89,9 @@ export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="Enter goal title" 
-                      {...field} 
+                    <Input
+                      placeholder="Enter goal title"
+                      {...field}
                       data-testid={`input-edit-goal-title-${goal.id}`}
                     />
                   </FormControl>
@@ -73,7 +99,7 @@ export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
                 </FormItem>
               )}
             />
-            
+
             {/* Category Field */}
             <FormField
               control={form.control}
@@ -83,7 +109,9 @@ export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
                   <FormLabel>Category</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger data-testid={`select-edit-goal-category-${goal.id}`}>
+                      <SelectTrigger
+                        data-testid={`select-edit-goal-category-${goal.id}`}
+                      >
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                     </FormControl>
@@ -108,10 +136,10 @@ export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
                 <FormItem>
                   <FormLabel>Target Date (Deadline)</FormLabel>
                   <FormControl>
-                    <Input 
+                    <Input
                       type="date"
                       {...field}
-                      value={field.value || ''}
+                      value={field.value || ""}
                       data-testid={`input-edit-goal-target-date-${goal.id}`}
                     />
                   </FormControl>
@@ -119,7 +147,7 @@ export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
                 </FormItem>
               )}
             />
-            
+
             <div className="grid grid-cols-2 gap-4">
               {/* Status Field */}
               <FormField
@@ -130,7 +158,9 @@ export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
                     <FormLabel>Status</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger data-testid={`select-edit-goal-status-${goal.id}`}>
+                        <SelectTrigger
+                          data-testid={`select-edit-goal-status-${goal.id}`}
+                        >
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
@@ -144,7 +174,7 @@ export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
                   </FormItem>
                 )}
               />
-              
+
               {/* Priority Level Field */}
               <FormField
                 control={form.control}
@@ -154,7 +184,9 @@ export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
                     <FormLabel>Priority Level</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger data-testid={`select-edit-goal-priority-${goal.id}`}>
+                        <SelectTrigger
+                          data-testid={`select-edit-goal-priority-${goal.id}`}
+                        >
                           <SelectValue placeholder="Select priority" />
                         </SelectTrigger>
                       </FormControl>
@@ -172,8 +204,10 @@ export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
 
             {/* Optional Fields Section */}
             <div className="space-y-4 pt-2 border-t">
-              <h4 className="text-sm font-medium text-muted-foreground">Optional Fields</h4>
-              
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Optional Fields
+              </h4>
+
               {/* Unit Field */}
               <FormField
                 control={form.control}
@@ -181,16 +215,23 @@ export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Unit (Optional)</FormLabel>
-                    <Select onValueChange={(value) => field.onChange(value === "none" ? undefined : value)} value={field.value || "none"}>
+                    <Select
+                      onValueChange={(value) =>
+                        field.onChange(value === "none" ? undefined : value)
+                      }
+                      value={field.value || "none"}
+                    >
                       <FormControl>
-                        <SelectTrigger data-testid={`select-edit-goal-unit-${goal.id}`}>
+                        <SelectTrigger
+                          data-testid={`select-edit-goal-unit-${goal.id}`}
+                        >
                           <SelectValue placeholder="Select unit" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
                         <SelectItem value="lbs">lbs</SelectItem>
-                        <SelectItem value="money">money</SelectItem>
+                        <SelectItem value="dollars">dollars</SelectItem>
                         <SelectItem value="time">time</SelectItem>
                         <SelectItem value="count">count</SelectItem>
                       </SelectContent>
@@ -209,12 +250,18 @@ export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
                     <FormItem>
                       <FormLabel>Starting Value (Optional)</FormLabel>
                       <FormControl>
-                        <Input 
+                        <Input
                           type="number"
                           placeholder="0"
                           {...field}
-                          value={field.value || ''}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          value={field.value || ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined,
+                            )
+                          }
                           data-testid={`input-edit-goal-starting-value-${goal.id}`}
                         />
                       </FormControl>
@@ -222,7 +269,7 @@ export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
                     </FormItem>
                   )}
                 />
-                
+
                 {/* Target Value Field */}
                 <FormField
                   control={form.control}
@@ -231,12 +278,18 @@ export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
                     <FormItem>
                       <FormLabel>Target Value (Optional)</FormLabel>
                       <FormControl>
-                        <Input 
+                        <Input
                           type="number"
                           placeholder="100"
                           {...field}
-                          value={field.value || ''}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          value={field.value || ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined,
+                            )
+                          }
                           data-testid={`input-edit-goal-target-value-${goal.id}`}
                         />
                       </FormControl>
@@ -246,11 +299,11 @@ export function EditGoalDialog({ goal, onEdit, trigger }: EditGoalDialogProps) {
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-end space-x-2 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => setOpen(false)}
                 data-testid={`button-cancel-edit-${goal.id}`}
               >

@@ -46,7 +46,7 @@ export const goals = pgTable("goals", {
   targetDate: date("target_date"),
   status: text("status").notNull().default("not_started"), // not_started, in_progress, completed
   priorityLevel: text("priority_level").notNull().default("medium"), // low, medium, high
-  unit: text("unit"), // lbs, money, time, count (optional)
+  unit: text("unit"), // lbs, dollars, time, count (optional)
   startingValue: integer("starting_value"), // optional
   targetValue: integer("target_value"), // optional
   isActive: boolean("is_active").notNull().default(true),

@@ -19,66 +19,80 @@ interface GoalCardProps {
   onDelete?: (goalId: string) => void;
 }
 
-export function GoalCard({ 
-  goal, 
-  streak, 
-  progress, 
+export function GoalCard({
+  goal,
+  streak,
+  progress,
   completionCount,
   currentValue,
   onComplete,
   onLogProgress,
   onEdit,
-  onDelete 
+  onDelete,
 }: GoalCardProps) {
   const getStatusColor = (status: string) => {
     const colors = {
-      'not_started': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300',
-      'in_progress': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-      'completed': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+      not_started:
+        "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
+      in_progress:
+        "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+      completed:
+        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
     };
     return colors[status as keyof typeof colors] || colors.not_started;
   };
 
   const getPriorityColor = (priority: string) => {
     const colors = {
-      'low': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300',
-      'medium': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-      'high': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+      low: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
+      medium:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
+      high: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
     };
     return colors[priority as keyof typeof colors] || colors.medium;
   };
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'No deadline';
+    if (!dateString) return "No deadline";
     const date = new Date(dateString);
     return date.toLocaleDateString();
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'not_started': return 'Not Started';
-      case 'in_progress': return 'In Progress';
-      case 'completed': return 'Completed';
-      default: return status;
+      case "not_started":
+        return "Not Started";
+      case "in_progress":
+        return "In Progress";
+      case "completed":
+        return "Completed";
+      default:
+        return status;
     }
   };
 
   const getPriorityText = (priority: string) => {
     switch (priority) {
-      case 'low': return 'Low';
-      case 'medium': return 'Medium';
-      case 'high': return 'High';
-      default: return priority;
+      case "low":
+        return "Low";
+      case "medium":
+        return "Medium";
+      case "high":
+        return "High";
+      default:
+        return priority;
     }
   };
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      health: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-      finance: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-      learning: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-      personal: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300',
-      general: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
+      health:
+        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+      finance: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+      learning:
+        "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+      personal: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300",
+      general: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
     };
     return colors[category as keyof typeof colors] || colors.general;
   };
@@ -97,24 +111,35 @@ export function GoalCard({
 
   const getCurrentValueText = () => {
     if (!goal.unit) return null;
-    const displayValue = currentValue !== null && currentValue !== undefined ? currentValue : goal.startingValue;
+    const displayValue =
+      currentValue !== null && currentValue !== undefined
+        ? currentValue
+        : goal.startingValue;
+    const formattedValue = new Intl.NumberFormat().format(displayValue ?? 0);
     if (displayValue === null || displayValue === undefined) return null;
-    return `Current ${goal.unit === 'lbs' ? 'weight' : goal.unit}: ${displayValue} ${goal.unit}`;
+    return `Current ${goal.unit === "lbs" ? "weight" : goal.unit}: ${formattedValue} ${goal.unit}`;
   };
 
   const getDisplayCurrentValue = () => {
-    return currentValue !== null && currentValue !== undefined ? currentValue : (goal.startingValue || 0);
+    return currentValue !== null && currentValue !== undefined
+      ? currentValue
+      : goal.startingValue || 0;
   };
 
   const getCategoryDotColor = (category: string) => {
     const colors = {
-      health: 'bg-green-500',
-      finance: 'bg-blue-500',
-      learning: 'bg-purple-500',
-      personal: 'bg-pink-500',
-      general: 'bg-gray-500'
+      health: "bg-green-500",
+      finance: "bg-blue-500",
+      learning: "bg-purple-500",
+      personal: "bg-pink-500",
+      general: "bg-gray-500",
     };
     return colors[category as keyof typeof colors] || colors.general;
+  };
+
+  const formatNumber = (value: number | null | undefined) => {
+    if (value === null || value === undefined) return '0';
+    return new Intl.NumberFormat().format(value);
   };
 
   const daysLeft = getDaysLeft(goal.targetDate);
@@ -125,23 +150,34 @@ export function GoalCard({
         {/* Top row: Category badge with dot and streak with flame */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${getCategoryDotColor(goal.category)}`}></div>
-            <Badge className={getCategoryColor(goal.category)} data-testid={`goal-category-${goal.id}`}>
+            <div
+              className={`w-2 h-2 rounded-full ${getCategoryDotColor(goal.category)}`}
+            ></div>
+            <Badge
+              className={getCategoryColor(goal.category)}
+              data-testid={`goal-category-${goal.id}`}
+            >
               {goal.category.charAt(0).toUpperCase() + goal.category.slice(1)}
             </Badge>
-            <Badge className={getPriorityColor(goal.priorityLevel)} data-testid={`goal-priority-${goal.id}`}>
+            <Badge
+              className={getPriorityColor(goal.priorityLevel)}
+              data-testid={`goal-priority-${goal.id}`}
+            >
               {getPriorityText(goal.priorityLevel)}
             </Badge>
           </div>
           <div className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
             <Flame className="w-4 h-4 text-orange-500" />
-            <span data-testid={`goal-streak-${goal.id}`}>{streak}</span>
+            <span data-testid={`goal-streak-${goal.id}`}>{formatNumber(streak)}</span>
           </div>
         </div>
 
         {/* Title */}
         <div>
-          <h3 className="text-lg font-semibold text-foreground" data-testid={`goal-title-${goal.id}`}>
+          <h3
+            className="text-lg font-semibold text-foreground"
+            data-testid={`goal-title-${goal.id}`}
+          >
             {goal.title}
           </h3>
           {getCurrentValueText() && (
@@ -152,14 +188,13 @@ export function GoalCard({
           <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
             <Calendar className="w-4 h-4" />
             <span data-testid={`goal-days-left-${goal.id}`}>
-              {daysLeft !== null 
-                ? daysLeft > 0 
-                  ? `${daysLeft} days left`
-                  : daysLeft === 0 
-                    ? 'Due today'
-                    : `${Math.abs(daysLeft)} days overdue`
-                : 'No deadline'
-              }
+              {daysLeft !== null
+                ? daysLeft > 0
+                  ? `${formatNumber(daysLeft)} days left`
+                  : daysLeft === 0
+                    ? "Due today"
+                    : `${formatNumber(Math.abs(daysLeft))} days overdue`
+                : "No deadline"}
             </span>
           </div>
         </div>
@@ -167,12 +202,15 @@ export function GoalCard({
         {/* Progress section */}
         {goal.unit && goal.targetValue && (
           <div className="space-y-2">
-            <div className="text-sm font-medium" data-testid={`goal-progress-text-${goal.id}`}>
-              {getDisplayCurrentValue()} / {goal.targetValue} {goal.unit}
+            <div
+              className="text-sm font-medium"
+              data-testid={`goal-progress-text-${goal.id}`}
+            >
+              {formatNumber(getDisplayCurrentValue())} / {formatNumber(goal.targetValue)} {goal.unit}
             </div>
-            <Progress 
-              value={progress} 
-              className="h-2" 
+            <Progress
+              value={progress}
+              className="h-2"
               data-testid={`goal-progress-${goal.id}`}
             />
           </div>
@@ -181,10 +219,7 @@ export function GoalCard({
         {/* Bottom row: Action buttons */}
         <div className="flex justify-end">
           <div className="flex flex-wrap gap-2">
-            <EditGoalDialog 
-              goal={goal}
-              onEdit={onEdit || (() => {})}
-            />
+            <EditGoalDialog goal={goal} onEdit={onEdit || (() => {})} />
             <Button
               size="sm"
               variant="outline"
@@ -195,18 +230,15 @@ export function GoalCard({
               Delete
             </Button>
             {goal.unit && goal.targetValue && onLogProgress ? (
-              <LogProgressDialog 
-                goal={goal}
-                onLogProgress={onLogProgress}
-              />
+              <LogProgressDialog goal={goal} onLogProgress={onLogProgress} />
             ) : (
               <Button
                 size="sm"
                 onClick={() => onComplete?.(goal.id)}
-                disabled={goal.status === 'completed'}
+                disabled={goal.status === "completed"}
                 data-testid={`button-complete-${goal.id}`}
               >
-                {goal.status === 'completed' ? 'Completed' : 'Complete'}
+                {goal.status === "completed" ? "Completed" : "Complete"}
               </Button>
             )}
           </div>
