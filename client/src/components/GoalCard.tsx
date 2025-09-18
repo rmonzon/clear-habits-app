@@ -166,7 +166,7 @@ export function GoalCard({
         )}
 
         {/* Bottom row: Days left and action buttons */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Calendar className="w-3 h-3" />
             <span data-testid={`goal-days-left-${goal.id}`}>
@@ -180,7 +180,7 @@ export function GoalCard({
               }
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto sm:justify-end">
             <EditGoalDialog 
               goal={goal}
               onEdit={onEdit || (() => {})}
