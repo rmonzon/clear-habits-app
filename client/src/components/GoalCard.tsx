@@ -167,9 +167,9 @@ export function GoalCard({
 
         {/* Bottom row: Days left and action buttons */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <Calendar className="w-3 h-3" />
-            <span data-testid={`goal-days-left-${goal.id}`}>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
+            <Calendar className="w-4 h-4" />
+            <span data-testid={`goal-days-left-${goal.id}`} className="whitespace-nowrap">
               {daysLeft !== null 
                 ? daysLeft > 0 
                   ? `${daysLeft} days left`
