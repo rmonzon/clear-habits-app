@@ -4,9 +4,9 @@ A simple web app to create and track goals and resolutions throughout the year.
 
 This is week #1 of the **The Future Engineer: AI as a Partner, not a Replacement** series. 
 
-- Learn more [here](https://www.linkedin.com/newsletters/7373394218125410304/).
-- Track progress at [here](https://docs.google.com/spreadsheets/d/1aFv2tBcxh-T5G6dI1kDoM_TffqwFxUHWGzOWd6FsmUk/edit?gid=0#gid=0).
-- Live [demo](https://resolutions-tracker.replit.app/)
+- Subscribe to my newsletter on LinkedIn [here](https://www.linkedin.com/newsletters/7373394218125410304/).
+- Track progress [here](https://docs.google.com/spreadsheets/d/1aFv2tBcxh-T5G6dI1kDoM_TffqwFxUHWGzOWd6FsmUk/edit?gid=0#gid=0).
+- See it live at [https://clearhabits.app](https://clearhabits.app/)
 
 ---
 
