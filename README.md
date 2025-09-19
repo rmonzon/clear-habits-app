@@ -21,11 +21,10 @@ This is week #1 of the **The Future Engineer: AI as a Partner, not a Replacement
 
 ## Tech Stack
 
-- **Frontend**: Next.js
+- **Frontend**: [React](https://react.dev/)/Typescript
 - **Styling**: Tailwind CSS  
-- **Backend / DB**: Postgres  
-- **Language**: TypeScript  
-- **Configuration**: Tailwind config
+- **Backend / DB**: Node.js & Postgres  
+- **Authentication**: [Clerk](https://clerk.com)
 - **AI**: Built with Replit Agent 3
 
 ---
