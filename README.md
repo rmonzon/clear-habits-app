@@ -25,7 +25,7 @@ This is week #1 of the **The Future Engineer: AI as a Partner, not a Replacement
 - **Styling**: Tailwind CSS  
 - **Backend / DB**: Node.js & Postgres  
 - **Authentication**: [Clerk](https://clerk.com)
-- **AI**: Built with Replit Agent 3
+- **AI**: Built with [Replit](https://replit.com/)'s Agent 3
 
 ---
 
